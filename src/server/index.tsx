@@ -31,7 +31,7 @@ app.get('*', (c) => {
           {import.meta.env.PROD ? (
             <script type="module" src="/static/client.js"></script>
           ) : (
-            <script type="module" src="/src/frontend/client.tsx"></script>
+            <script type="module" src="/src/client/main.tsx"></script>
           )}
         </head>
         <body>

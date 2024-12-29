@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       devServer({
-        entry: 'src/backend/server.tsx',
+        entry: 'src/server/index.tsx',
         injectClientScript: false, // hot-reload
         adapter: nodeAdapter,
         exclude: ['/src/styles/*', ...defaultOptions.exclude],
