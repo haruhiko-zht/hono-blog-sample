@@ -1,0 +1,51 @@
+volumes:
+  mysql_data_vol:
+  mysql_sock:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+  mysql_log:
+  redis:
+
+services:
+  db:
+    image: mysql:8.0
+    command: bash -c 'usermod -o -u ${USER_UID} mysql; groupmod -o -g ${USER_GID} mysql; chown -R mysql:root /var/run/mysqld/ /var/log/mysql/ /var/lib/mysql/; /entrypoint.sh mysqld --user=mysql --console'
+    ports:
+      - target: 3306
+        published: ${MYSQLD_IP_PORT:-3306}
+        protocol: tcp
+        mode: host
+    volumes:
+      - ./docker/mysql/conf.d:/etc/mysql/conf.d
+      - ./docker/mysql/mysql-init:/docker-entrypoint-initdb.d
+      - mysql_data_vol:/var/lib/mysql
+      - mysql_sock:/var/run/mysqld
+      - mysql_log:/var/log/mysql
+    environment:
+      - TZ=${TZ:-Asia/Tokyo}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_TEST_DATABASE_PREFIX=${MYSQL_TEST_DATABASE_PREFIX:-_test_}
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - target: 6379
+        published: ${REDIS_IP_PORT:-6379}
+        protocol: tcp
+        mode: host
+    volumes:
+      - redis:/data
+    restart: unless-stopped
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - target: 8025
+        published: ${MAILHOG_IP_PORT:-8025}
+        protocol: tcp
+        mode: host
