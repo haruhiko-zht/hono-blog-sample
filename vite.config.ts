@@ -6,7 +6,7 @@ import nodeAdapter from '@hono/vite-dev-server/node';
 export default defineConfig(({ mode }) => {
   return {
     server: {
-      port: 45173,
+      port: 40003,
     },
     ssr: {
       external: ['react', 'react-dom'],
