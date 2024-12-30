@@ -1,5 +1,5 @@
 import path from 'path';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import build from '@hono/vite-build/node';
 import devServer, { defaultOptions } from '@hono/vite-dev-server';
 import nodeAdapter from '@hono/vite-dev-server/node';
@@ -38,9 +38,11 @@ export default defineConfig(({ mode }) => {
       },
     };
   } else {
+    const env = loadEnv(mode, process.cwd(), '');
+
     return {
       server: {
-        port: 40003,
+        port: Number(env.VITE_DEV_PORT) || 40003,
       },
       ssr: {
         external: ['react', 'react-dom'],
@@ -63,7 +65,7 @@ export default defineConfig(({ mode }) => {
         build({
           entry: 'src/server/index.tsx',
           outputDir: 'dist',
-          port: 40000,
+          port: Number(env.VITE_NODE_PORT) || 40000,
         }),
       ],
       resolve: {
