@@ -1,5 +1,7 @@
 import { renderToString } from 'react-dom/server';
 import { Hono } from 'hono';
+import { serveStatic } from '@hono/node-server/serve-static';
+import Template from './Template';
 
 type Env = {
   Bindings: {
@@ -9,6 +11,9 @@ type Env = {
 
 const app = new Hono<Env>();
 
+app.use('/client/*', serveStatic({ root: './' }));
+app.use('/static/*', serveStatic({ root: './' }));
+
 app.get('/api/clock', (c) => {
   return c.json({
     var: c.env.MY_VAR, // Cloudflare Bindings
@@ -16,28 +21,42 @@ app.get('/api/clock', (c) => {
   });
 });
 
+app.get('/hoge', (c) => {
+  return c.html(
+    renderToString(
+      <Template
+        title="hoge"
+        contents={<div id="root"></div>}
+        js={<script type="module" src={import.meta.env.PROD ? '/client/hoge.c.js' : '/src/client/hoge.tsx'}></script>}
+      />,
+    ),
+  );
+});
+
+app.get('/fuga', (c) => {
+  return c.html(
+    renderToString(
+      <Template
+        title="fuga"
+        contents={<div id="root"></div>}
+        js={<script type="module" src={import.meta.env.PROD ? '/client/fuga.c.js' : '/src/client/fuga.tsx'}></script>}
+      />,
+    ),
+  );
+});
+
 app.get('*', (c) => {
   return c.html(
     renderToString(
-      <html>
-        <head>
-          <meta charSet="utf-8" />
-          <meta content="width=device-width, initial-scale=1" name="viewport" />
-          {import.meta.env.PROD ? (
-            <link rel="stylesheet" href="/static/style.scss" />
-          ) : (
-            <link rel="stylesheet" href="/src/styles/style.scss" />
-          )}
-          {import.meta.env.PROD ? (
-            <script type="module" src="/static/client.js"></script>
-          ) : (
-            <script type="module" src="/src/client/main.tsx"></script>
-          )}
-        </head>
-        <body>
-          <div id="root"></div>
-        </body>
-      </html>,
+      <Template
+        contents={<div id="root"></div>}
+        js={
+          <script
+            type="module"
+            src={import.meta.env.PROD ? '/client/welcome.c.js' : '/src/client/welcome.tsx'}
+          ></script>
+        }
+      />,
     ),
   );
 });
