@@ -66,6 +66,7 @@ export default defineConfig(({ mode }) => {
           entry: 'src/server/index.tsx',
           outputDir: 'dist',
           port: Number(env.VITE_NODE_PORT) || 40000,
+          external: ['@prisma/client'],
         }),
       ],
       resolve: {
