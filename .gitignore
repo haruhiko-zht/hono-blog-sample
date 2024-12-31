@@ -1,5 +1,7 @@
-/dist
-node_modules
+/dist/
+node_modules/
+prisma/.cache/
+prisma/client/
 .env
 
-/misc
+/misc/

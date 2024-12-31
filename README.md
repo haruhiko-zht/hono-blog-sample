@@ -2,6 +2,13 @@
 
 For learning.
 
+# init
+
+```sh
+npm install
+npx prisma migrate dev
+```
+
 # dev
 
 ```sh
