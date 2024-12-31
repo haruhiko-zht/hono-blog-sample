@@ -1,6 +1,7 @@
 import { renderToString } from 'react-dom/server';
 import { Hono } from 'hono';
 import { serveStatic } from '@hono/node-server/serve-static';
+import { PrismaClient } from '@prisma/client';
 import Template from './Template';
 
 type Env = {
@@ -40,6 +41,29 @@ app.get('/fuga', (c) => {
         title="fuga"
         contents={<div id="root"></div>}
         js={<script type="module" src={import.meta.env.PROD ? '/client/fuga.c.js' : '/src/client/fuga.tsx'}></script>}
+      />,
+    ),
+  );
+});
+
+app.get('/db', async (c) => {
+  const prisma = new PrismaClient();
+  const categories = await prisma.category.findMany();
+  prisma.$disconnect();
+
+  return c.html(
+    renderToString(
+      <Template
+        title="db"
+        contents={
+          <>
+            {categories.map((category) => (
+              <div>
+                {category.id}:{category.name}
+              </div>
+            ))}
+          </>
+        }
       />,
     ),
   );
