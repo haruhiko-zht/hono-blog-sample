@@ -12,10 +12,7 @@ services:
     image: mysql:8.0
     command: bash -c 'usermod -o -u ${USER_UID} mysql; groupmod -o -g ${USER_GID} mysql; chown -R mysql:root /var/run/mysqld/ /var/log/mysql/ /var/lib/mysql/; /entrypoint.sh mysqld --user=mysql --console'
     ports:
-      - target: 3306
-        published: ${MYSQLD_IP_PORT:-3306}
-        protocol: tcp
-        mode: host
+      - ${MYSQLD_IP_PORT:-3306}:3306
     volumes:
       - ./docker/mysql/conf.d:/etc/mysql/conf.d
       - ./docker/mysql/mysql-init:/docker-entrypoint-initdb.d
@@ -32,12 +29,8 @@ services:
 
   redis:
     image: redis:latest
-    container_name: redis
     ports:
-      - target: 6379
-        published: ${REDIS_IP_PORT:-6379}
-        protocol: tcp
-        mode: host
+      - ${REDIS_IP_PORT:-6379}:6379
     volumes:
       - redis:/data
     restart: unless-stopped
@@ -45,7 +38,4 @@ services:
   mailhog:
     image: mailhog/mailhog
     ports:
-      - target: 8025
-        published: ${MAILHOG_IP_PORT:-8025}
-        protocol: tcp
-        mode: host
+      - ${MAILHOG_IP_PORT:-8025}:8025
