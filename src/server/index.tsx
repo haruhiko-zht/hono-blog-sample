@@ -1,3 +1,4 @@
+import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { Hono } from 'hono';
 import { serveStatic } from '@hono/node-server/serve-static';
@@ -12,8 +13,10 @@ type Env = {
 
 const app = new Hono<Env>();
 
-app.use('/client/*', serveStatic({ root: './' }));
-app.use('/static/*', serveStatic({ root: './' }));
+if (import.meta.env.PROD) {
+  app.use('/client/*', serveStatic({ root: './' }));
+  app.use('/static/*', serveStatic({ root: './' }));
+}
 
 app.get('/api/clock', (c) => {
   return c.json({
@@ -56,13 +59,13 @@ app.get('/db', async (c) => {
       <Template
         title="db"
         contents={
-          <>
+          <React.Fragment>
             {categories.map((category) => (
-              <div>
+              <div key={category.id}>
                 {category.id}:{category.name}
               </div>
             ))}
-          </>
+          </React.Fragment>
         }
       />,
     ),
