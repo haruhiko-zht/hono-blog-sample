@@ -1,9 +1,6 @@
-import React from 'react';
-import { renderToString } from 'react-dom/server';
 import { Hono } from 'hono';
-import { serveStatic } from '@hono/node-server/serve-static';
-import { PrismaClient } from '@prisma/client';
-import Template from './Template';
+import prisma from './db';
+import routes from './routes';
 
 type Env = {
   Bindings: {
@@ -13,79 +10,15 @@ type Env = {
 
 const app = new Hono<Env>();
 
-if (import.meta.env.PROD) {
-  app.use('/client/*', serveStatic({ root: './' }));
-  app.use('/static/*', serveStatic({ root: './' }));
+app.route('/', routes);
+
+async function gracefulShutdown() {
+  await prisma.$disconnect();
+  console.log('Prisma disconnected');
+  process.exit(0);
 }
 
-app.get('/api/clock', (c) => {
-  return c.json({
-    var: c.env.MY_VAR, // Cloudflare Bindings
-    time: new Date().toLocaleTimeString(),
-  });
-});
-
-app.get('/hoge', (c) => {
-  return c.html(
-    renderToString(
-      <Template
-        title="hoge"
-        contents={<div id="root"></div>}
-        js={<script type="module" src={import.meta.env.PROD ? '/client/hoge.c.js' : '/src/client/hoge.tsx'}></script>}
-      />,
-    ),
-  );
-});
-
-app.get('/fuga', (c) => {
-  return c.html(
-    renderToString(
-      <Template
-        title="fuga"
-        contents={<div id="root"></div>}
-        js={<script type="module" src={import.meta.env.PROD ? '/client/fuga.c.js' : '/src/client/fuga.tsx'}></script>}
-      />,
-    ),
-  );
-});
-
-app.get('/db', async (c) => {
-  const prisma = new PrismaClient();
-  const categories = await prisma.category.findMany();
-  prisma.$disconnect();
-
-  return c.html(
-    renderToString(
-      <Template
-        title="db"
-        contents={
-          <React.Fragment>
-            {categories.map((category) => (
-              <div key={category.id}>
-                {category.id}:{category.name}
-              </div>
-            ))}
-          </React.Fragment>
-        }
-      />,
-    ),
-  );
-});
-
-app.get('*', (c) => {
-  return c.html(
-    renderToString(
-      <Template
-        contents={<div id="root"></div>}
-        js={
-          <script
-            type="module"
-            src={import.meta.env.PROD ? '/client/welcome.c.js' : '/src/client/welcome.tsx'}
-          ></script>
-        }
-      />,
-    ),
-  );
-});
+process.on('SIGINT', gracefulShutdown);
+process.on('SIGTERM', gracefulShutdown);
 
 export default app;

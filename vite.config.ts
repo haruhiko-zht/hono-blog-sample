@@ -4,6 +4,11 @@ import build from '@hono/vite-build/node';
 import devServer, { defaultOptions } from '@hono/vite-dev-server';
 import nodeAdapter from '@hono/vite-dev-server/node';
 
+const alias = {
+  '@': path.resolve(__dirname, 'src'),
+  '~bootstrap': path.resolve(__dirname, 'node_modules/bootstrap'),
+};
+
 export default defineConfig(({ mode }) => {
   if (mode === 'client') {
     return {
@@ -32,9 +37,7 @@ export default defineConfig(({ mode }) => {
         },
       },
       resolve: {
-        alias: {
-          '~bootstrap': path.resolve(__dirname, 'node_modules/bootstrap'),
-        },
+        alias: alias,
       },
     };
   } else {
@@ -70,9 +73,7 @@ export default defineConfig(({ mode }) => {
         }),
       ],
       resolve: {
-        alias: {
-          '~bootstrap': path.resolve(__dirname, 'node_modules/bootstrap'),
-        },
+        alias: alias,
       },
     };
   }
